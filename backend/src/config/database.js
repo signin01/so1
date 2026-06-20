@@ -15,7 +15,9 @@ const pool = mysql.createPool({
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
     ssl: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        // Aiven specific SSL settings
+        minVersion: 'TLSv1.2'
     }
 });
 
@@ -28,6 +30,7 @@ const testConnection = async () => {
         return true;
     } catch (error) {
         console.error('❌ Database connection failed:', error.message);
+        console.error('Full error:', error);
         return false;
     }
 };
