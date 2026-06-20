@@ -9,9 +9,24 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+// ============================================
+// MIDDLEWARE
+// ============================================
+
+// Security
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:3000' }));
+
+// CORS - Allow multiple origins
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://hospital-pharmacy-frontend.onrender.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json());
@@ -20,7 +35,7 @@ app.use(express.json());
 // ROUTES
 // ============================================
 
-// Auth Routes (ADD THIS - BEFORE other routes)
+// Auth Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // Medicine Routes
@@ -37,8 +52,8 @@ app.use('/api/payments', require('./routes/paymentRoutes'));
 // ============================================
 
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
@@ -62,8 +77,8 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     console.error('Error:', err.message);
     console.error('Stack:', err.stack);
-    res.status(err.status || 500).json({ 
-        success: false, 
+    res.status(err.status || 500).json({
+        success: false,
         message: err.message || 'Internal server error',
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });

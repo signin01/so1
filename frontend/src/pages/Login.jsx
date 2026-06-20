@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   useTheme,
   CircularProgress,
-  Chip,  // ✅ ADDED
+  Chip,
 } from '@mui/material';
 import {
   Visibility,
@@ -25,23 +25,42 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import axios from 'axios';
 
 const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { login, isLoading, error, clearAuthError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const API_URL = process.env.REACT_APP_API_URL || 'https://so1-orma.onrender.com/api';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    clearAuthError();
-    const result = await login(email, password);
-    if (result.success) {
-      navigate('/');
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email,
+        password
+      });
+
+      if (response.data.success) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        navigate('/');
+      } else {
+        setError(response.data.message || 'Login failed');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,7 +110,7 @@ const Login = () => {
             </Box>
 
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }} onClose={clearAuthError}>
+              <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
                 {error}
               </Alert>
             )}
@@ -159,14 +178,14 @@ const Login = () => {
                 variant="contained"
                 fullWidth
                 size="large"
-                disabled={isLoading}
+                disabled={loading}
                 sx={{
                   borderRadius: 2,
                   py: 1.5,
                   position: 'relative',
                 }}
               >
-                {isLoading ? <CircularProgress size={24} /> : 'Login'}
+                {loading ? <CircularProgress size={24} /> : 'Login'}
               </Button>
             </form>
 
