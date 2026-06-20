@@ -15,10 +15,10 @@ class DashboardController {
             // Total value
             const [valueResult] = await promisePool.query('SELECT ROUND(SUM(stock_quantity * unit_price), 2) as value FROM medicines');
             
-            // Categories distribution
-            const [categories] = await promisePool.query('SELECT category, COUNT(*) as count FROM medicines WHERE category IS NOT NULL AND category != "" GROUP BY category ORDER BY count DESC LIMIT 5');
+            // Categories distribution - FIXED: Removed empty column reference
+            const [categories] = await promisePool.query('SELECT category, COUNT(*) as count FROM medicines WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 5');
 
-            // Clean response - ensure all values are numbers
+            // Clean response
             const response = {
                 success: true,
                 totalMedicines: parseInt(totalResult[0]?.total || 0),
@@ -31,8 +31,6 @@ class DashboardController {
                 }))
             };
 
-            // Send clean JSON
-            res.setHeader('Content-Type', 'application/json');
             res.json(response);
             
         } catch (error) {
