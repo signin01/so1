@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// ============================================
+// API BASE URL - Change for local development
+// ============================================
+// For production (Render):
+const API_BASE_URL = 'https://so1-orma.onrender.com/api';
+// For local development (uncomment this and comment the above):
+// const API_BASE_URL = 'http://localhost:5000/api';
 
 // ============================================
 // AXIOS INSTANCE
@@ -15,7 +21,7 @@ const api = axios.create({
 });
 
 // ============================================
-// REQUEST INTERCEPTOR
+// REQUEST INTERCEPTOR - Add auth token
 // ============================================
 
 api.interceptors.request.use(
@@ -30,7 +36,7 @@ api.interceptors.request.use(
 );
 
 // ============================================
-// RESPONSE INTERCEPTOR
+// RESPONSE INTERCEPTOR - Clean data & handle errors
 // ============================================
 
 api.interceptors.response.use(
